@@ -17,6 +17,11 @@ public class Gusanito_GUI extends javax.swing.JFrame {
 
     static Scanner sc = new Scanner(System.in);
     static Random rand = new Random();
+    ArrayList<String> instrucciones = new ArrayList<String>();
+    char matrix[][];
+
+    static char apple = 'ó';
+    static char culebra = 'S';
 
     /**
      * Creates new form Gusanito_GUI
@@ -45,7 +50,7 @@ public class Gusanito_GUI extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("Stencil", 0, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel1.setText("LAB 9-Q4 2022 ");
+        jLabel1.setText("LAB 9-Q4 2023 ");
 
         jButton1.setText("GUSANITO");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -66,27 +71,26 @@ public class Gusanito_GUI extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(212, 212, 212)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(183, 183, 183)
-                        .addComponent(jLabel1))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(212, 212, 212)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(26, 26, 26)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(202, Short.MAX_VALUE))
+                .addContainerGap(231, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(30, 30, 30)
+                .addGap(31, 31, 31)
                 .addComponent(jLabel1)
                 .addGap(49, 49, 49)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(70, 70, 70)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(84, Short.MAX_VALUE))
+                .addContainerGap(175, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -106,20 +110,175 @@ public class Gusanito_GUI extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         String[] spl;
-        char matrix[][];
+
         String coord = JOptionPane.showInputDialog(null, "Ingrese las coordenadas en formato ancho, alto:");
         spl = coord.split(",");
         int ancho = Integer.parseInt(spl[0]);
         int alto = Integer.parseInt(spl[1]);
+        instrucciones = new ArrayList<String>();
+
         if (ancho >= 4 && ancho <= 10 && alto >= 4 && alto <= 10) {
-            matrix = generateMatrix(ancho, alto);
-            printMatrix(matrix);
+            generateMatrix(ancho, alto);
+            generateRandMat(ancho, alto);
+            String mapa = printMatrix();
+
+            String msg = "";
+            boolean salir = false;
+            int paso_actual = 1;
+
+            while (!salir) {
+                msg = mapa + "\n\n" + "1. Ingresar instruccion \n 2. Ejecutar instrucciones";
+                String input = JOptionPane.showInputDialog(null, msg);
+                switch (input) {
+                    case "1":
+                        msg = mapa + "\n\n Ingrese la instruccion de la forma magnitudDIRECCION (ej. 2UP)";
+                        String instruccion = JOptionPane.showInputDialog(null, msg);
+                        instrucciones.add(instruccion);
+                        salir = false;
+                        break;
+                    case "2":
+                        if (paso_actual < 0) 
+                        { paso_actual = 0; }
+                        msg = mostrarPaso(paso_actual);
+                        String opcion2 = "";
+                        while (opcion2 != "4") {
+                            opcion2 = JOptionPane.showInputDialog(null, msg);
+                            switch (opcion2) {
+                                case "1":
+                                    paso_actual++;
+                                    msg = mostrarPaso(paso_actual);
+                                    break;
+                                case "2":
+                                    paso_actual--;
+                                    msg = mostrarPaso(paso_actual);
+                                    break;
+                                case "3":
+                                    String pasoNuevo = JOptionPane.showInputDialog(null, "Ingrese el paso a mostrar.");
+                                    paso_actual = Integer.parseInt(pasoNuevo);
+                                    msg = mostrarPaso(paso_actual);
+                                    break;
+                                case "4":
+                                    salir = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
         } else {
             JOptionPane.showMessageDialog(rootPane, "Las coordenadas deben estar entre 4 y 10");
         }
 
 
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private String mostrarPaso(int paso) {
+
+        String msg = "";
+        int alto = matrix.length - 1;
+        int ancho = matrix[0].length - 1;
+
+        char[][] matriz = new char[alto + 1][ancho + 1];
+
+        if (paso > instrucciones.size()) {
+            return "Esa instruccion no existe.";
+        }
+
+        int posX = 0, posY = 0;
+
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                matriz[i][j] = matrix[i][j];
+                if (matrix[i][j] == culebra) {
+                    posX = i;
+                    posY = j;
+                }
+            }
+        }
+
+        int nposX = posX, nposY = posY;
+
+        String msgError = "";
+
+        for (int i = 0; i < paso; i++) {
+            String inst = instrucciones.get(i);
+            
+            int magnitud = Integer.parseInt(inst.substring(0, 1));
+            String direccion = inst.substring(1);
+
+            msgError = "";
+            switch (direccion) {
+                case "UP":
+                    nposX = nposX - magnitud;
+                    if (nposX < 0) {
+                        nposX = 0;
+                        msgError = "Se sale del rango superior de la matriz.";
+                    }
+                    break;
+                case "RT":
+                    nposY = nposY + magnitud;
+                    if (nposY > ancho) {
+                        nposY = ancho;
+                        msgError = "Se sale del rango derecho de la matriz.";
+                    }
+                    break;
+                case "LT":
+                    nposY = nposY - magnitud;
+                    if (nposY < 0) {
+                        nposY = 0;
+                        msgError = "Se sale del rango izquierdo de la matriz.";
+                    }
+                    break;
+                case "DN":
+                    nposX = nposX + magnitud;
+                    if (nposX > alto) {
+                        nposX = alto;
+                        msgError = "Se sale del rango inferior de la matriz.";
+                    }
+                    break;
+                default:
+                    msgError = "Instruccion invalida.";
+                    break;
+            }
+        }
+
+        if (msgError == "") //Se mueve la culebra
+        {
+            switch (matrix[nposX][nposY]) {
+                case ' ':
+                    msg = "Mostrando paso: " + (paso);
+                    matriz[posX][posY] = ' ';
+                    matriz[nposX][nposY] = culebra;
+                    break;
+                case 'ó':
+                    msg = "Mostrando paso: " + (paso);
+                    msg += "\nLlegaste a la manzana!";
+                    matriz[posX][posY] = ' ';
+                    matriz[nposX][nposY] = culebra;
+                    break;
+                case '#':
+                    msg = "Mostrando paso: " + (paso);
+                    msg += "\nChocaste con un obstaculo!";
+                    matriz[posX][posY] = ' ';
+                    matriz[nposX][nposY] = 'X';
+                    break;
+            }
+        } else {
+            msg = msgError;
+        }
+        
+        if (msg == "" && paso == 0)
+        { msg = "Mostrando el paso inicial.";}
+
+        msg = printMatriz(matriz) + "\n\n" + msg + "\n\n1. Ver siguiente paso\n2. Ver paso anterior\n3. Seleccionar paso. \n4. Volver al menu.";
+
+        return msg;
+    }
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
@@ -162,7 +321,7 @@ public class Gusanito_GUI extends javax.swing.JFrame {
     }
 
     public char[][] generateMatrix(int ancho, int alto) {
-        char[][] matrix = new char[ancho][alto];
+        matrix = new char[ancho][alto];
         for (int i = 0; i < ancho; i++) {
             for (int j = 0; j < alto; j++) {
                 matrix[i][j] = ' ';
@@ -172,7 +331,7 @@ public class Gusanito_GUI extends javax.swing.JFrame {
         return matrix;
     }
 
-    public void printMatrix(char[][] matrix) {
+    public String printMatrix() {
         String acumstr = " ";
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
@@ -181,29 +340,53 @@ public class Gusanito_GUI extends javax.swing.JFrame {
             acumstr += "\n";
 
         }
-        JOptionPane.showMessageDialog(null, acumstr);
+        return acumstr;
     }
 
-    public char[][] generateRandMat(char[][] matrix, int ancho, int alto) {
+    public String printMatriz(char[][] matriz) {
+        String acumstr = " ";
+        for (int i = 0; i < matriz.length; i++) {
+            for (int j = 0; j < matriz.length; j++) {
+                acumstr += "[" + matriz[i][j] + "]";
+            }
+            acumstr += "\n";
+        }
+        return acumstr;
+    }
+
+    public char[][] generateRandMat(int ancho, int alto) {
+        for (int i = 0; i < ancho; i++) {
+            for (int j = 0; j < alto; j++) {
+                matrix[i][j] = ' ';
+            }
+        }
+
         int posMx = rand.nextInt(ancho);
         int posMy = rand.nextInt(alto);
+
         int posgusMx = rand.nextInt(ancho);
         int posgusMy = rand.nextInt(alto);
 
-        char apple = 'ó';
-        char culebra = 'S';
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
-                if (i == posMx && j == posMy) {
-                    matrix[i][j] = apple;
-                } else if (i == posgusMx && j == posgusMy) {
-                    matrix[i][j] = culebra;
-                } else{
-                    matrix[i][j]=' ';
-                }
+        while (posMx == posgusMx && posMy == posgusMy) {
+            posgusMx = rand.nextInt(ancho);
+            posgusMy = rand.nextInt(alto);
+        }
+
+        matrix[posMx][posMy] = apple;
+        matrix[posgusMx][posgusMy] = culebra;
+
+        int contObs = 0;
+
+        while (contObs < ancho) {
+            int pbx = rand.nextInt(ancho);
+            int pby = rand.nextInt(alto);
+
+            if (matrix[pbx][pby] == ' ') {
+                matrix[pbx][pby] = '#';
+                contObs++;
             }
         }
-        
+
         return matrix;
     }
 
